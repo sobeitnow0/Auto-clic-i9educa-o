@@ -8,8 +8,33 @@
 // @description Clica automaticamente na imagem 'next.svg' a cada 20 segundos na página de visualização de curso da i9educacao.
 // ==/UserScript==
 
+Entendi perfeitamente! Você quer que o script só comece a clicar automaticamente depois que você fizer o primeiro clique manual na imagem. Essa é uma ótima ideia para garantir que você tenha controle inicial.
+
+Para isso, vamos usar um "flag" (uma variável booleana) que indicará se o primeiro clique já aconteceu. O script vai ficar "escutando" o seu clique na imagem e, só depois que você clicar, ele vai ativar o setInterval.
+
+Script Atualizado: Click Humano Primeiro
+
+Aqui está o script completo com a funcionalidade de esperar o seu clique inicial:
+JavaScript
+
+// ==UserScript==
+// @name        Auto-Click Next Image (i9educacao) - Click Humano Primeiro
+// @namespace   Violentmonkey Scripts
+// @match       https://i9educacao.com/watch-course/post-graduation/vf6IF7xEjnygV0J4ggce
+// @grant       none
+// @version     1.2
+// @author      Seu Nome
+// @description Clica automaticamente na imagem 'next.svg' a cada 20 segundos na página de visualização de curso da i9educacao, APÓS o primeiro clique manual.
+// ==/UserScript==
+
 (function() {
     'use strict';
+
+    // Variável para controlar se o primeiro clique já foi feito
+    let firstClickOccurred = false;
+
+    // A duração do intervalo em milissegundos (20 segundos)
+    const intervalDuration = 20 * 1000; // 20 segundos
 
     // Função que tenta encontrar e clicar na imagem "next"
     function clickNextImage() {
@@ -19,14 +44,41 @@
         if (image) {
             // Se a imagem for encontrada, simula um clique
             image.click();
-            console.log('Script Violentmonkey: Imagem "next" clicada com sucesso!');
+            console.log('Script Violentmonkey: Imagem "next" clicada automaticamente!');
         } else {
             // Se a imagem não for encontrada, registra uma mensagem no console
-            console.log('Script Violentmonkey: Imagem "next" não encontrada no momento. Tentando novamente em 20 segundos...');
+            console.log('Script Violentmonkey: Imagem "next" não encontrada no momento. Tentando novamente no próximo ciclo...');
         }
     }
 
-    // Inicia um temporizador que executa a função clickNextImage a cada 20 segundos (20000 milissegundos)
-    setInterval(clickNextImage, 20000);
+    // Função para configurar o "listener" de clique
+    function setupClickListener() {
+        const imageToClick = document.querySelector('img[src="/assets/icons/next.svg"].h-6');
+
+        if (imageToClick) {
+            // Adiciona um "ouvinte" de evento para o clique na imagem
+            imageToClick.addEventListener('click', function handler() {
+                if (!firstClickOccurred) {
+                    firstClickOccurred = true;
+                    console.log('Script Violentmonkey: Primeiro clique humano detectado. Iniciando cliques automáticos a cada ' + (intervalDuration / 1000) + ' segundos.');
+                    
+                    // Remove o próprio ouvinte para que ele não seja acionado novamente
+                    imageToClick.removeEventListener('click', handler);
+
+                    // Inicia o intervalo de cliques automáticos
+                    setInterval(clickNextImage, intervalDuration);
+                }
+            });
+            console.log('Script Violentmonkey: Aguardando o primeiro clique humano na imagem "next".');
+        } else {
+            // Se a imagem não for encontrada imediatamente, tenta novamente em um curto período
+            // Isso é útil se a imagem carregar dinamicamente após a página inicial
+            console.log('Script Violentmonkey: Imagem "next" não encontrada para configurar o listener. Tentando novamente em 2 segundos...');
+            setTimeout(setupClickListener, 2000); // Tenta novamente em 2 segundos
+        }
+    }
+
+    // Inicia a configuração do "listener" assim que a página é carregada
+    setupClickListener();
 
 })();
