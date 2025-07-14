@@ -1,0 +1,67 @@
+// ==UserScript==
+// @name        Auto-Click Next (i9educacao) - Ativado por Clique Humano
+// @namespace   Violentmonkey Scripts
+// @match       https://i9educacao.com/watch-course/post-graduation/vf6IF7xEjnygV0J4ggce
+// @grant       none
+// @version     1.2
+// @author      Sobeitnow
+// @description Clica automaticamente na imagem 'next.svg' a cada 20 segundos na página da i9educacao, APÓS o primeiro clique manual do usuário.
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Variável de controle: se o primeiro clique humano já ocorreu
+    let firstClickOccurred = false;
+
+    // Duração do intervalo entre os cliques automáticos (em milissegundos)
+    const intervalDuration = 20 * 1000; // 20 segundos
+
+    // --- Função Principal de Clique Automático ---
+    function performAutoClick() {
+        // Tenta encontrar a imagem "next" usando seu seletor CSS
+        const nextImage = document.querySelector('img[src="/assets/icons/next.svg"].h-6');
+
+        if (nextImage) {
+            // Se a imagem for encontrada, simula um clique nela
+            nextImage.click();
+            console.log('VM Script: Imagem "next" clicada automaticamente!');
+        } else {
+            // Se não encontrar a imagem, informa no console e tenta novamente no próximo ciclo
+            console.log('VM Script: Imagem "next" não encontrada no momento. Tentando novamente no próximo ciclo...');
+        }
+    }
+
+    // --- Função para Detectar o Primeiro Clique Humano ---
+    function setupHumanClickListener() {
+        const targetImage = document.querySelector('img[src="/assets/icons/next.svg"].h-6');
+
+        if (targetImage) {
+            // Adiciona um "ouvinte" de evento para o clique na imagem
+            // A função 'handler' será executada apenas uma vez para o primeiro clique
+            targetImage.addEventListener('click', function handler() {
+                if (!firstClickOccurred) {
+                    firstClickOccurred = true; // Marca que o primeiro clique ocorreu
+                    console.log('VM Script: Primeiro clique humano detectado. Iniciando cliques automáticos a cada ' + (intervalDuration / 1000) + ' segundos.');
+                    
+                    // Remove este próprio ouvinte de evento para que não haja cliques duplicados
+                    targetImage.removeEventListener('click', handler);
+
+                    // Inicia o intervalo de cliques automáticos
+                    setInterval(performAutoClick, intervalDuration);
+                }
+            });
+            console.log('VM Script: Aguardando o primeiro clique manual na imagem "next" para iniciar a automação.');
+        } else {
+            // Se a imagem não for encontrada imediatamente (ex: carregamento dinâmico da página),
+            // tenta configurar o ouvinte novamente após um pequeno atraso.
+            console.log('VM Script: Imagem "next" não encontrada para configurar o ouvinte. Tentando novamente em 2 segundos...');
+            setTimeout(setupHumanClickListener, 2000); // Tenta novamente após 2 segundos
+        }
+    }
+
+    // --- Início do Script ---
+    // Inicia o processo de configurar o ouvinte de clique humano assim que a página é carregada
+    setupHumanClickListener();
+
+})();
