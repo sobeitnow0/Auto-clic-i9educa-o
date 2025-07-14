@@ -1,0 +1,32 @@
+// ==UserScript==
+// @name        Auto-Click i9educacao
+// @namespace   Violentmonkey Scripts
+// @match       https://i9educacao.com/watch-course/*
+// @grant       none
+// @version     1.1
+// @author      Sobeit
+// @description Clica automaticamente na imagem 'next.svg' a cada 30 segundos na página de visualização de curso da i9educacao.
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Função que tenta encontrar e clicar na imagem "next"
+    function clickNextImage() {
+        // Seleciona a imagem com base no atributo src e na classe CSS
+        const image = document.querySelector('img[src="/assets/icons/next.svg"].h-6');
+
+        if (image) {
+            // Se a imagem for encontrada, simula um clique
+            image.click();
+            console.log('Script Violentmonkey: Imagem "next" clicada com sucesso!');
+        } else {
+            // Se a imagem não for encontrada, registra uma mensagem no console
+            console.log('Script Violentmonkey: Imagem "next" não encontrada no momento. Tentando novamente em 30 segundos...');
+        }
+    }
+
+    // Inicia um temporizador que executa a função clickNextImage a cada 30 segundos (30000 milissegundos)
+    setInterval(clickNextImage, 20000);
+
+})();
